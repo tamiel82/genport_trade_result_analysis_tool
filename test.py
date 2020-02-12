@@ -41,7 +41,7 @@ rc('font', family=font_name)
 mpl.rcParams['axes.unicode_minus'] = False # 마이너스(-) 폰트 깨짐 처리
 
 # csv 파일 호출
-base_dir = 'D:/Dropbox/python'
+base_dir = '/'
 port1_file = 'trade_history_daily_825555.csv'
 port2_file = 'trade_history_daily_861231.csv'
 port3_file = 'trade_history_daily_949125.csv'

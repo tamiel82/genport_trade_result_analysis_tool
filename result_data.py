@@ -12,7 +12,7 @@ import math #수학 계산 라이브러리 (제곱근 sqrt 계산용)
 import os #운영체제 제공 기능 라이브러리
 
 # csv 파일 호출 - GUI로 파일 열어서 값 입력 될 수 있도록 하자.
-base_dir = 'D:/Dropbox/python'
+base_dir = 'D:/Dropbox/genport_trade_result_analysis_tool/'
 port1_file = 'trade_history_daily_825555.csv'
 port2_file = 'trade_history_daily_861231.csv'
 port3_file = 'trade_history_daily_949125.csv'
@@ -260,3 +260,5 @@ for i, j in zip(date,all_port_UW_tmp):
             all_port_UW.append((start,end)) # 리스트에 시작일과 종료일로 이루어진 튜플을 추가한다.
     pre_val = j
     end = i
+
+print(all_port_UW)
