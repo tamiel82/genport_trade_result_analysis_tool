@@ -1,16 +1,19 @@
 #-*- coding:utf-8 -*-
 
-'''
+"""
 데이터 전처리 모듈
-'''
-
+"""
 # 라이브러리 호출
 import pandas as pd #pandas 데이터 처리 라이브러리
 import datetime as dt #날짜변환
-import statistics # 통계 처리 라이브러리 (표준편차 stdev 계산용)
-import math #수학 계산 라이브러리 (제곱근 sqrt 계산용)
+from pandas import Series, DataFrame #dataframe 호출
+import sqlite3 # db 관리 라이브러리
 import os #운영체제 제공 기능 라이브러리
 
+
+"""
+csv 파일 불러서 기본 데이터프레임 만들기
+"""
 # csv 파일 호출 - GUI로 파일 열어서 값 입력 될 수 있도록 하자.
 base_dir = 'D:/Dropbox/genport_trade_result_analysis_tool/'
 port1_file = 'trade_history_daily_825555.csv'
@@ -28,7 +31,7 @@ for i in range(1,6):
     else:
         globals()[port]=os.path.join(base_dir,locals()[port_file]) #globals():전역변수 설정, locals():지역변수 설정
 
-# 데이터를 dataframe(df)으로 변환
+# csv 파일 데이터 읽기
 for i in range(1,6):
     port_file = "port" + str(i) + "_file"  # 동적 변수명 규칙 : port(포트번호)_file
     port = "port" + str(i)
@@ -38,18 +41,37 @@ for i in range(1,6):
     else:
         globals()[port_df]=pd.read_csv(locals()[port])
 
-# 날짜(date) 데이터 만들기
-date=[dt.datetime.strptime(str(i),"%Y%m%d").date() for i in port1_df.날짜] #숫자형 YYYYMMDD를 날짜로 변환
-
-# 일일등락률(return) 데이터 만들기
+# 날짜-일일수익률 데이터프레임 만들기
+port_merge_df = pd.DataFrame(columns={"날짜"}) # 날짜 컬럼만 가진 빈 데이터프레임 만들기
 for i in range(1,6):
     port_file = "port" + str(i) + "_file"  # 동적 변수명 규칙 : port(포트번호)_file
+    port = "port" + str(i)
     port_df = "port"+str(i)+"_df"
+    if not locals()[port_file] : # port 파일이 없으면 변수 안만들기
+        pass
+    else:
+        locals()[port_df] = pd.DataFrame({"날짜":locals()[port_df].날짜, "port" + str(i) + "_return":locals()[port_df].일일수익률})
+        port_merge_df = pd.merge(port_merge_df, locals()[port_df], on="날짜", how="outer")
+
+port_merge_df = port_merge_df.fillna(0)
+
+"""
+각 데이터 리스트 만들기
+"""
+# 날짜(date) 리스트 생성
+date=port_merge_df['날짜']
+date=[dt.datetime.strptime(str(i),"%Y%m%d").date() for i in date] #숫자형 YYYYMMDD를 날짜로 변환
+
+# 일일수익률(port_return) 리스트 생성
+for i in range(1,6):
+    port_file = "port" + str(i) + "_file"  # 동적 변수명 규칙 : port(포트번호)_file
+    port = "port" + str(i)
     port_return = "port" + str(i) + "_return"
     if not locals()[port_file] : # port 파일이 없으면 변수 안만들기
         pass
     else:
-        globals()[port_return]=[float(j) for j in locals()[port_df].일일수익률] #수익률을 소수점 실수로 변환
+        locals()[port_return] = port_merge_df["port" + str(i) + "_return"]
+        locals()[port_return] = [float(j) for j in locals()[port_return]]  # 수익률을 소수점 실수로 변환
 
 # 최초 설정액(initial) 세팅
 for i in range(1,6):
@@ -261,4 +283,3 @@ for i, j in zip(date,all_port_UW_tmp):
     pre_val = j
     end = i
 
-print(all_port_UW)
